@@ -1,9 +1,13 @@
 package com.rouvsen.codeevalengine.service;
 
 import com.rouvsen.codeevalengine.compiler.InMemoryJavaCompiler;
+import com.rouvsen.codeevalengine.dao.entity.CodeSubmissionEntity;
+import com.rouvsen.codeevalengine.dao.repository.CodeSubmissionRepository;
 import com.rouvsen.codeevalengine.model.CompilationResult;
 import com.rouvsen.codeevalengine.model.dto.CodeSubmissionDto;
 import com.rouvsen.codeevalengine.model.dto.EvaluationResultDto;
+import java.util.Objects;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -12,13 +16,20 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 @Service
+@RequiredArgsConstructor
 public class QuizEvaluationService {
 
     private final InMemoryJavaCompiler compiler = new InMemoryJavaCompiler();
+    private final CodeSubmissionRepository codeSubmissionRepository;
 
     public EvaluationResultDto evaluateSolution(CodeSubmissionDto submission) {
+        CodeSubmissionEntity codeSubmissionEntity =
+                codeSubmissionRepository.findCodeSubmissionEntityById(submission.getQuestionId())
+                        .orElseThrow(() -> new IllegalArgumentException("Question not found with id "
+                                + submission.getQuestionId()));
+
         String className = extractClassName(submission.getSourceCode());
-        if (className == null) {
+        if (Objects.isNull(className)) {
             return new EvaluationResultDto(false,
                     "Could not extract class name from source",
                     "",
@@ -42,7 +53,7 @@ public class QuizEvaluationService {
 
         try {
             File currentDir = new File(System.getProperty("user.dir"));
-            URLClassLoader classLoader = new URLClassLoader(new URL[]{currentDir.toURI().toURL()});
+            URLClassLoader classLoader = new URLClassLoader(new URL[] {currentDir.toURI().toURL()});
             Class<?> compiledClass = classLoader.loadClass(className);
             Method solveMethod = compiledClass.getDeclaredMethod("solve", String.class);
 
@@ -52,11 +63,8 @@ public class QuizEvaluationService {
             long usedMemoryAfter = getUsedMemory();
             long endTime = System.currentTimeMillis();
 
-            boolean correct = """
-                    *
-                    **
-                    ***
-                    """.equals(solveOutput);
+            boolean correct = Objects.equals(codeSubmissionEntity.getResult(), solveOutput);
+
             if (correct) {
                 return new EvaluationResultDto(true,
                         "Correct Answer",
@@ -86,13 +94,17 @@ public class QuizEvaluationService {
     private String extractClassName(String sourceCode) {
         String keyword = "class ";
         int index = sourceCode.indexOf(keyword);
-        if (index == -1) return null;
+        if (index == -1) {
+            return null;
+        }
         int start = index + keyword.length();
         int end = start;
         while (end < sourceCode.length() && Character.isJavaIdentifierPart(sourceCode.charAt(end))) {
             end++;
         }
-        if (start == end) return null;
+        if (start == end) {
+            return null;
+        }
         return sourceCode.substring(start, end);
     }
 

@@ -14,7 +14,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @FieldDefaults(level = PRIVATE)
 public class CodeSubmissionDto {
-    String questionId;
-    String studentId;
+    Long questionId;
+    Long studentId;
     String sourceCode;
 }
