@@ -1,0 +1,89 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001_create_code_submission_and_question_group_tables
+      author: Rovshan Maharramov
+      changes:
+        - createTable:
+            tableName: question_group
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITHOUT TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITHOUT TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+        - createTable:
+            tableName: code_submission
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITHOUT TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITHOUT TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: question
+                  type: TEXT
+              - column:
+                  name: result
+                  type: TEXT
+              - column:
+                  name: response_type
+                  type: VARCHAR(50)
+              - column:
+                  name: question_type
+                  type: VARCHAR(50)
+              - column:
+                  name: question_purpose
+                  type: VARCHAR(50)
+              - column:
+                  name: question_category
+                  type: VARCHAR(50)
+              - column:
+                  name: programming_language
+                  type: VARCHAR(50)
+              - column:
+                  name: question_group_id
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+
+        - addForeignKeyConstraint:
+            baseTableName: code_submission
+            baseColumnNames: question_group_id
+            referencedTableName: question_group
+            referencedColumnNames: id
+            constraintName: fk_code_submission_group
+            onDelete: CASCADE

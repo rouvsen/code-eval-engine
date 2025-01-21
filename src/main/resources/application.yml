@@ -21,7 +21,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
       naming:
         physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
         implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
@@ -29,3 +29,5 @@ spring:
       hibernate.id.new_generator_mappings: true
       hibernate.connection.provider_disables_autocommit: true
     show-sql: true #will be false on prod
+  liquibase:
+    change-log: classpath:liquibase/changelog-master.yaml
